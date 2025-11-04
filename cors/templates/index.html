@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>扫码上传工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .qr-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .images-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .qr-code {
+            margin: 20px 0;
+            border: 2px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .image-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            background: white;
+        }
+        .image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 3px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .refresh-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 → 🖥️ 手机扫码上传图片工具</h1>
+
+    <div class="info">
+        <strong>使用说明：</strong>
+        1. 确保手机和电脑在同一WiFi网络下<br>
+        2. 用手机扫描右侧二维码<br>
+        3. 选择图片或拍照上传<br>
+        4. 图片将自动显示在左侧区域
+    </div>
+
+    <div class="container">
+        <div class="qr-section">
+            <h2>📱 扫描上传</h2>
+            <div class="qr-code">
+                <img src="{{ qr_code }}" alt="扫描二维码上传图片" style="width: 200px; height: 200px;">
+            </div>
+            <p>上传地址：<br><code>{{ upload_url }}</code></p>
+            <button class="refresh-btn" onclick="location.reload()">🔄 刷新图片列表</button>
+            <p><small>图片将保存到 uploads 文件夹</small></p>
+        </div>
+
+        <div class="images-section">
+            <h2>🖼️ 已上传的图片 ({{ images|length }}张)</h2>
+            <div class="image-grid" id="imageGrid">
+                {% for image in images %}
+                <div class="image-item">
+                    <img src="{{ url_for('get_image', filename=image) }}"
+                         alt="{{ image }}"
+                         onclick="showLargeImage('{{ image }}')">
+                    <div style="font-size: 12px; margin-top: 5px; word-break: break-all;">{{ image[:15] }}...</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 每10秒自动刷新图片列表
+        setInterval(() => {
+            fetch('/images')
+                .then(response => response.json())
+                .then(images => {
+                    // 简单比较图片数量，有变化就刷新页面
+                    if (images.length !== {{ images|length }}) {
+                        location.reload();
+                    }
+                });
+        }, 10000);
+
+        function showLargeImage(filename) {
+            window.open(`/images/${filename}`, '_blank');
+        }
+    </script>
+</body>
+</html>
