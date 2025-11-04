@@ -1,0 +1,6 @@
+[build]
+  command = "pip install -r requirements.txt"  # 构建命令：安装Python依赖
+  publish = "templates"  # 发布目录：包含你的前端静态文件
+
+[functions]
+  directory = "functions"  # Serverless函数所在目录
